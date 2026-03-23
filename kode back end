@@ -1,0 +1,101 @@
+/**
+ * APLIKASI TES MINAT BAKAT RIASEC - MAN 3 SOLOK
+ * Developer: Gemini
+ */
+
+function doGet() {
+  return HtmlService.createTemplateFromFile('index')
+    .evaluate()
+    .setTitle('Tes RIASEC - MAN 3 Solok')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+const SS = SpreadsheetApp.getActiveSpreadsheet();
+
+// Ambil 30 soal dari tab 'soal'
+function getSoal() {
+  try {
+    const sheet = SS.getSheetByName('soal');
+    return sheet.getDataRange().getValues().slice(1); 
+  } catch (e) {
+    return [];
+  }
+}
+
+// Login Admin
+function loginAdmin(user, pass) {
+  const sheet = SS.getSheetByName('admin');
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] == user && data[i][1] == pass) return true;
+  }
+  return false;
+}
+
+// Simpan Hasil Tes
+function submitHasil(bio, skor) {
+  const sheet = SS.getSheetByName('users');
+  
+  const categories = [
+    { key: 'R', name: 'Realistic' },
+    { key: 'I', name: 'Investigative' },
+    { key: 'A', name: 'Artistic' },
+    { key: 'S', name: 'Social' },
+    { key: 'E', name: 'Enterprising' },
+    { key: 'C', name: 'Conventional' }
+  ];
+
+  // Urutkan skor untuk mencari top 3
+  let resultArr = categories.map(cat => ({
+    code: cat.key,
+    name: cat.name,
+    score: skor[cat.key] || 0
+  }));
+  
+  resultArr.sort((a, b) => b.score - a.score);
+  
+  const top3Code = `${resultArr[0].code}${resultArr[1].code}${resultArr[2].code}`;
+  const top3Names = `${resultArr[0].name}, ${resultArr[1].name}, ${resultArr[2].name}`;
+  const interpretasi = getInterpretasi(resultArr[0].code, resultArr[1].code);
+
+  sheet.appendRow([
+    new Date(), bio.nama, bio.usia, bio.instansi,
+    skor.R, skor.I, skor.A, skor.S, skor.E, skor.C,
+    top3Code, interpretasi
+  ]);
+  
+  return { code: top3Code, names: top3Names, text: interpretasi };
+}
+
+// Interpretasi berdasarkan Dokumen Teori Holland
+function getInterpretasi(p1, p2) {
+  const data = {
+    'R': 'Tipe Realistic: Praktis, suka alat, mesin, dan aktivitas fisik. Cocok: Teknik, Pertanian, Mekanik.',
+    'I': 'Tipe Investigative: Analitis, suka meneliti dan sains. Cocok: Kedokteran, Sains, Teknologi.',
+    'A': 'Tipe Artistic: Kreatif, ekspresi diri, imajinatif. Cocok: Desain, Seni, Musik, Media.',
+    'S': 'Tipe Social: Suka membantu dan mengajar. Cocok: Guru, Psikolog, Bimbingan Konseling.',
+    'E': 'Tipe Enterprising: Suka memimpin dan bisnis. Cocok: Manajemen, Bisnis, Marketing.',
+    'C': 'Tipe Conventional: Terorganisir, teliti, suka data. Cocok: Akuntansi, Administrasi, Statistika.'
+  };
+
+  const combo = p1 + p2;
+  const supplements = {
+    'SA': ' Kombinasi Sosial-Artistik: Sangat cocok untuk bidang Pendidikan Kreatif atau Media Komunikasi.',
+    'RI': ' Kombinasi Realistic-Investigative: Sangat cocok untuk pengembangan Teknologi Sains atau Teknik Murni.',
+    'ES': ' Kombinasi Enterprising-Social: Cocok untuk Kepemimpinan Organisasi Bisnis atau Sosial.',
+    'CE': ' Kombinasi Conventional-Enterprising: Cocok untuk Manajemen Administrasi Bisnis atau Keuangan.'
+  };
+
+  return (data[p1] || "") + (supplements[combo] || supplements[p2+p1] || "");
+}
+
+// Admin API
+function getAllUsers() {
+  return SS.getSheetByName('users').getDataRange().getValues();
+}
+
+function deleteUser(row) {
+  SS.getSheetByName('users').deleteRow(parseInt(row) + 1);
+  return true;
+}
