@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #f0f2f5; color: #1c1e21; }
+        .hero { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); color: white; padding: 60px 0; border-radius: 0 0 30px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .card-app { border: none; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-top: -50px; background: white; }
+        .q-box { border-radius: 15px; padding: 20px; border-left: 6px solid #2563eb; background: #ffffff; margin-bottom: 20px; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .q-box:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .admin-btn { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000; }
+        .nav-link { font-weight: 600; color: #64748b; }
+        .nav-link.active { color: #2563eb !important; border-bottom: 3px solid #2563eb; }
+        .res-badge { font-size: 2.8rem; letter-spacing: 5px; color: #1e40af; background: #eff6ff; padding: 10px 25px; border-radius: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="hero text-center mb-5">
+        <div class="container">
+            <h1 class="fw-bold">Portal Tes Minat Bakat</h1>
+            <p class="opacity-75 fs-5">Kenali Potensi Diri dan Tentukan Langkah Masa Depan Anda</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="card card-app p-4 p-md-5">
+                    
+                    <!-- BIODATA -->
+                    <div id="view-bio">
+                        <h4 class="fw-bold mb-4 text-center">Data Diri Peserta</h4>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Lengkap</label>
+                            <input type="text" id="inp-nama" class="form-control form-control-lg" placeholder="Masukkan nama...">
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Usia</label>
+                                <input type="number" id="inp-usia" class="form-control" placeholder="Umur">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Instansi/Sekolah</label>
+                                <input type="text" id="inp-inst" class="form-control" placeholder="Asal sekolah/kantor">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-sm" onclick="start()">Mulai Tes Sekarang</button>
+                    </div>
+
+                    <!-- QUIZ -->
+                    <div id="view-quiz" class="d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="badge bg-primary px-3 py-2" id="pg-text">Halaman 1</span>
+                            <div class="progress flex-grow-1 mx-3" style="height: 12px;">
+                                <div id="p-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div id="quiz-list"></div>
+                        <div class="d-flex justify-content-between mt-5">
+                            <button class="btn btn-outline-secondary px-5" id="btn-p" onclick="nav(-1)" disabled>Kembali</button>
+                            <button class="btn btn-primary px-5" id="btn-n" onclick="nav(1)">Lanjut</button>
+                        </div>
+                    </div>
+
+                    <!-- RESULT -->
+                    <div id="view-res" class="d-none text-center">
+                        <div class="mb-4"><img src="https://cdn-icons-png.flaticon.com/512/1149/1149168.png" width="80"></div>
+                        <h2 class="fw-bold mb-1">Hasil Analisis Minat</h2>
+                        <p class="text-muted mb-4">Berdasarkan jawaban Anda, tipe kepribadian dominan Anda adalah:</p>
+                        <div class="mb-4"><span class="res-badge fw-bold shadow-sm" id="res-c">---</span></div>
+                        <h5 class="fw-bold text-dark mb-4" id="res-n">---</h5>
+                        <div class="text-start bg-light p-4 rounded-4 border">
+                            <h6 class="fw-bold text-primary">Interpretasi:</h6>
+                            <p id="res-d" class="mb-0 text-secondary lh-lg"></p>
+                        </div>
+                        <button class="btn btn-dark btn-lg w-100 mt-5" onclick="location.reload()">Selesai & Keluar</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN BUTTON -->
+    <button class="btn btn-dark admin-btn" onclick="openAdmin()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 16 16"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/></svg>
+    </button>
+
+    <!-- ADMIN DASHBOARD MODAL -->
+    <div class="modal fade" id="mod-adm" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-light py-3">
+                    <h5 class="fw-bold m-0">Dashboard Admin Portal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="adm-auth" class="text-center py-4">
+                        <div class="mb-3 mx-auto" style="max-width: 300px;">
+                            <input type="text" id="adm-u" class="form-control mb-2" placeholder="Username">
+                            <input type="password" id="adm-p" class="form-control mb-3" placeholder="Password">
+                            <button class="btn btn-primary w-100 fw-bold" onclick="login()">Masuk Sebagai Admin</button>
+                        </div>
+                    </div>
+                    <div id="adm-main" class="d-none">
+                        <ul class="nav nav-tabs mb-4 border-0">
+                            <li class="nav-item"><button class="nav-link active border-0" data-bs-toggle="tab" data-bs-target="#tab-u" onclick="refreshUser()">Monitoring Peserta</button></li>
+                            <li class="nav-item"><button class="nav-link border-0" data-bs-toggle="tab" data-bs-target="#tab-s" onclick="refreshSoal()">Kelola Bank Soal</button></li>
+                        </ul>
+                        <div class="tab-content">
+                            <!-- TAB PESERTA -->
+                            <div class="tab-pane fade show active" id="tab-u">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light"><tr><th>Nama</th><th>Profil Skor (RIASEC)</th><th>Dominan</th><th>Aksi</th></tr></thead>
+                                        <tbody id="tbl-u"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- TAB SOAL -->
+                            <div class="tab-pane fade" id="tab-s">
+                                <button class="btn btn-success btn-sm mb-3 px-3 fw-bold" onclick="showAdd()">+ Tambah Soal Baru</button>
+                                <div class="table-responsive">
+                                    <table class="table table-sm border">
+                                        <thead class="table-light"><tr><th>Pertanyaan</th><th>Tipe</th><th>Aksi</th></tr></thead>
+                                        <tbody id="tbl-s"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITOR SOAL -->
+    <div class="modal fade" id="mod-edit" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header fw-bold">Editor Soal</div>
+                <div class="modal-body">
+                    <input type="hidden" id="ed-id">
+                    <label class="form-label small fw-bold">Pertanyaan</label>
+                    <textarea id="ed-txt" class="form-control mb-3" rows="3"></textarea>
+                    <label class="form-label small fw-bold">Kategori RIASEC</label>
+                    <select id="ed-typ" class="form-select">
+                        <option value="R">Realistic</option><option value="I">Investigative</option>
+                        <option value="A">Artistic</option><option value="S">Social</option>
+                        <option value="E">Enterprising</option><option value="C">Conventional</option>
+                    </select>
+                </div>
+                <div class="modal-footer"><button class="btn btn-primary w-100" onclick="save()">Simpan Perubahan</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let listSoal = [], answers = {}, page = 0, perPage = 5, userData = {};
+        const mAdm = new bootstrap.Modal(document.getElementById('mod-adm'));
+        const mEdit = new bootstrap.Modal(document.getElementById('mod-edit'));
+
+        function start() {
+            userData = { 
+                nama: document.getElementById('inp-nama').value, 
+                usia: document.getElementById('inp-usia').value, 
+                instansi: document.getElementById('inp-inst').value 
+            };
+            if(!userData.nama) return alert('Silakan isi nama Anda terlebih dahulu.');
+            
+            google.script.run.withSuccessHandler(data => {
+                listSoal = data;
+                document.getElementById('view-bio').classList.add('d-none');
+                document.getElementById('view-quiz').classList.remove('d-none');
+                render();
+            }).getSoal();
+        }
+
+        function render() {
+            const cont = document.getElementById('quiz-list');
+            cont.innerHTML = '';
+            const startIdx = page * perPage;
+            const endIdx = startIdx + perPage;
+            const chunk = listSoal.slice(startIdx, endIdx);
+
+            chunk.forEach((q, i) => {
+                const idx = startIdx + i;
+                const div = document.createElement('div');
+                div.className = 'q-box';
+                div.innerHTML = `<h6 class="fw-bold mb-3">${idx+1}. ${q[1]}</h6>
+                    <div class="row g-2 text-center">
+                        <div class="col-4"><input type="radio" class="btn-check" name="q${idx}" id="q${idx}1" onclick="answers[${idx}]=1" ${answers[idx]==1?'checked':''}>
+                        <label class="btn btn-outline-danger w-100" for="q${idx}1">Tidak</label></div>
+                        <div class="col-4"><input type="radio" class="btn-check" name="q${idx}" id="q${idx}2" onclick="answers[${idx}]=2" ${answers[idx]==2?'checked':''}>
+                        <label class="btn btn-outline-warning w-100" for="q${idx}2">Biasa</label></div>
+                        <div class="col-4"><input type="radio" class="btn-check" name="q${idx}" id="q${idx}3" onclick="answers[${idx}]=3" ${answers[idx]==3?'checked':''}>
+                        <label class="btn btn-outline-success w-100" for="q${idx}3">Ya</label></div>
+                    </div>`;
+                cont.appendChild(div);
+            });
+
+            const totalPage = Math.ceil(listSoal.length / perPage);
+            document.getElementById('pg-text').innerText = `Halaman ${page + 1} dari ${totalPage}`;
+            document.getElementById('p-bar').style.width = `${((page+1)/totalPage)*100}%`;
+            document.getElementById('btn-p').disabled = page === 0;
+            document.getElementById('btn-n').innerText = (endIdx >= listSoal.length) ? 'Lihat Hasil Analisis' : 'Halaman Berikutnya';
+        }
+
+        function nav(dir) {
+            const startIdx = page * perPage;
+            const endIdx = Math.min(startIdx + perPage, listSoal.length);
+            for(let i=startIdx; i<endIdx; i++) if(!answers[i]) return alert('Mohon jawab semua soal di halaman ini.');
+            
+            if(dir === 1 && endIdx >= listSoal.length) finish();
+            else { page += dir; render(); window.scrollTo(0,0); }
+        }
+
+        function finish() {
+            const scores = { R:0, I:0, A:0, S:0, E:0, C:0 };
+            listSoal.forEach((s, i) => scores[s[2].trim().toUpperCase()] += (answers[i] || 0));
+            
+            document.getElementById('quiz-list').innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary"></div><p class="mt-3">Menganalisis minat Anda...</p></div>';
+            
+            google.script.run.withSuccessHandler(res => {
+                document.getElementById('view-quiz').classList.add('d-none');
+                document.getElementById('view-res').classList.remove('d-none');
+                document.getElementById('res-c').innerText = res.code;
+                document.getElementById('res-n').innerText = res.names;
+                document.getElementById('res-d').innerText = res.text;
+            }).submitHasil(userData, scores);
+        }
+
+        // --- LOGIKA ADMIN ---
+        function openAdmin() { mAdm.show(); }
+        function login() {
+            google.script.run.withSuccessHandler(ok => {
+                if(ok) {
+                    document.getElementById('adm-auth').classList.add('d-none');
+                    document.getElementById('adm-main').classList.remove('d-none');
+                    refreshUser();
+                } else alert('Akses ditolak!');
+            }).loginAdmin(document.getElementById('adm-u').value, document.getElementById('adm-p').value);
+        }
+
+        function refreshUser() {
+            google.script.run.withSuccessHandler(data => {
+                const tbody = document.getElementById('tbl-u'); tbody.innerHTML = '';
+                data.slice(1).reverse().forEach((r, i) => {
+                    tbody.innerHTML += `<tr>
+                        <td><b>${r[1]}</b><br><small class="text-muted">${r[3]}</small></td>
+                        <td><small>R:${r[4]} I:${r[5]} A:${r[6]} S:${r[7]} E:${r[8]} C:${r[9]}</small></td>
+                        <td><span class="badge bg-primary px-3">${r[10]}</span></td>
+                        <td><button class="btn btn-sm text-danger" onclick="delUser(${data.length-2-i})">Hapus</button></td>
+                    </tr>`;
+                });
+            }).getAllUserData();
+        }
+
+        function refreshSoal() {
+            google.script.run.withSuccessHandler(data => {
+                const tbody = document.getElementById('tbl-s'); tbody.innerHTML = '';
+                data.forEach(s => {
+                    tbody.innerHTML += `<tr>
+                        <td><small>${s[1]}</small></td>
+                        <td class="text-center"><span class="badge bg-dark">${s[2]}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editSoal(${s[0]},'${s[1]}','${s[2]}')">Edit</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="delSoal(${s[0]})">Hapus</button>
+                        </td>
+                    </tr>`;
+                });
+            }).getSoal();
+        }
+
+        function showAdd() { document.getElementById('ed-id').value = ''; document.getElementById('ed-txt').value = ''; mEdit.show(); }
+        function editSoal(id, t, ty) { document.getElementById('ed-id').value = id; document.getElementById('ed-txt').value = t; document.getElementById('ed-typ').value = ty; mEdit.show(); }
+        function save() {
+            const id = document.getElementById('ed-id').value, t = document.getElementById('ed-txt').value, ty = document.getElementById('ed-typ').value;
+            if(id) google.script.run.withSuccessHandler(refreshSoal).updateSoal(id, t, ty);
+            else google.script.run.withSuccessHandler(refreshSoal).addSoal(t, ty);
+            mEdit.hide();
+        }
+        function delSoal(id) { if(confirm('Hapus soal ini?')) google.script.run.withSuccessHandler(refreshSoal).deleteSoal(id); }
+        function delUser(r) { if(confirm('Hapus data peserta?')) google.script.run.withSuccessHandler(refreshUser).deleteUser(r); }
+    </script>
+</body>
+</html>
